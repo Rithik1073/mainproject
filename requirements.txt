@@ -1,0 +1,9 @@
+streamlit
+tensorflow
+pillow
+gdown
+librosa==0.10.0
+pydub==0.25.1
+scipy==1.9.3
+matplotlib==3.6.2
+numpy==1.23.3
