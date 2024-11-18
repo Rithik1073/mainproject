@@ -3,10 +3,21 @@ import numpy as np
 from tensorflow.keras.models import load_model
 from pydub import AudioSegment
 import os
+import gdown
 from io import BytesIO
 
-# Define the model path (you may need to adjust this if it's hosted somewhere else)
-MODEL_PATH = 'your_model_path_here.keras'
+# URL to the model file (Google Drive link or other URLs)
+MODEL_URL = "https://drive.google.com/uc?export=download&id=1DK8yTXMdgSmjWAYKxCZP1F7HrDITMxQj"
+
+
+# Path to save the model locally
+MODEL_PATH = 'combinemodel.h5'
+
+# Check if the model is already downloaded, if not, download it
+if not os.path.exists(MODEL_PATH):
+    st.write("Downloading the model...")
+    gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+    st.write("Model downloaded successfully!")
 
 # Load the trained model
 model = load_model(MODEL_PATH)
@@ -84,5 +95,3 @@ if uploaded_file is not None:
     
     # Optional: Provide more information on the prediction (confidence, etc.)
     st.write(f"Prediction Confidence: {np.max(predictions)}")
-
-
