@@ -1,81 +1,88 @@
 import streamlit as st
 import numpy as np
-import os
-import gdown
 from tensorflow.keras.models import load_model
 from pydub import AudioSegment
-import librosa
-import librosa.display
-import matplotlib.pyplot as plt
-from scipy.io import savemat
-import tempfile
+import os
+from io import BytesIO
 
-# Path to save model
-MODEL_PATH = "combinemodel.h5"
+# Define the model path (you may need to adjust this if it's hosted somewhere else)
+MODEL_PATH = 'your_model_path_here.keras'
 
-# Check if the model file already exists locally, if not, download it
-if not os.path.exists(MODEL_PATH):
-    # Google Drive shareable link
-    file_id = '1DK8yTXMdgSmjWAYKxCZP1F7HrDITMxQj'
-    url = f'https://drive.google.com/uc?id={file_id}'
-
-    
-    gdown.download(url, MODEL_PATH, quiet=False)
-
-# Load the model
+# Load the trained model
 model = load_model(MODEL_PATH)
 
-# Class labels
-class_labels = {0: "Infected", 1: "Healthy"}
+# Define the class labels (adjust these labels according to your use case)
+class_labels = ['Normal', 'Inner', 'Roller', 'Outer']
+
+# Function to process and extract features from the audio file
+def preprocess_audio(audio_path):
+    """
+    Preprocess audio by loading the file and converting it to Mel Spectrogram.
+    """
+    # Load audio file using pydub
+    audio = AudioSegment.from_mp3(audio_path)
+    
+    # Convert to mono (if stereo)
+    audio = audio.set_channels(1)
+    
+    # Convert to the correct sample rate (if needed)
+    audio = audio.set_frame_rate(16000)
+    
+    # Export the audio as WAV
+    audio.export("temp.wav", format="wav")
+    
+    # Here, implement the feature extraction logic (e.g., Mel Spectrogram, MFCC)
+    # For simplicity, let's assume a dummy feature extraction function:
+    mel_input = np.random.rand(128, 128)  # This is a placeholder, replace with actual feature extraction logic
+    
+    return mel_input
+
+def extract_features(audio_path):
+    """
+    Extract additional features like MFCC, Chroma, or others. This function is a placeholder
+    and should be replaced with actual feature extraction code.
+    """
+    # Placeholder for actual feature extraction
+    features_input = np.random.rand(100)  # Replace this with your actual feature extraction
+    
+    return features_input
 
 # Streamlit UI
-st.title("Ball bearing damage detector 🎶")
-st.write("Upload an audio file (MP3).")
+st.title("Audio Classifier")
+st.write("Upload an audio file (MP3 format) to predict its class.")
 
-# Image upload widget
+# File uploader widget for audio file
 uploaded_file = st.file_uploader("Upload an Audio File", type=["mp3"])
 
 if uploaded_file is not None:
-    # Display the uploaded file's name
-    st.write("Processing...")
-
-    # Save the uploaded file to a temporary file
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-        tmp_file.write(uploaded_file.read())
-        tmp_file_path = tmp_file.name
-
-    # Convert MP3 to WAV using pydub
-    audio = AudioSegment.from_mp3(tmp_file_path)
-    wav_path = tmp_file_path.replace(".mp3", ".wav")
-    audio.export(wav_path, format="wav")
+    # Save the uploaded file to a temporary location
+    tmp_file_path = os.path.join("temp_audio.mp3")
+    with open(tmp_file_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
     
-    # Load the WAV file using librosa
-    y, sr = librosa.load(wav_path, sr=None)  # sr=None to preserve original sampling rate
+    # Display the uploaded audio file
+    st.audio(tmp_file_path, format='audio/mp3')
+    
+    # Preprocess audio and extract features
+    st.write("Processing the audio file...")
+    mel_input = preprocess_audio(tmp_file_path)
+    features_input = extract_features(tmp_file_path)
+    
+    # Ensure correct input shapes for the model
+    mel_input = np.expand_dims(mel_input, axis=0)  # Add batch dimension
+    features_input = np.expand_dims(features_input, axis=0)  # Add batch dimension
+    
+    # Make predictions
+    predictions = model.predict([mel_input, features_input])
+    predicted_class = np.argmax(predictions, axis=1)
+    
+    # Map predicted class index to label
+    predicted_label = class_labels[predicted_class[0]]
+    
+    # Display the prediction result
+    st.success(f"Predicted Class: {predicted_label}")
+    
+    # Optional: Provide more information on the prediction (confidence, etc.)
+    st.write(f"Prediction Confidence: {np.max(predictions)}")
 
-    # Extract features (e.g., MFCCs or spectrogram)
-    # For this example, we'll use MFCCs
-    mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)  # 13 MFCCs
-    mfccs = np.mean(mfccs, axis=1)  # Take the mean across time frames
 
-    # Reshape the MFCCs to match the input shape expected by the model
-    # Assuming the model expects a 2D input: (1, n_features)
-    input_features = np.expand_dims(mfccs, axis=0)
-
-    # Optionally, save the MFCCs as a .mat file for later use (if needed)
-    mat_filename = "audio_features.mat"
-    savemat(mat_filename, {"mfccs": mfccs})
-
-    # Make prediction
-    prediction = model.predict(input_features)
-    predicted_class = 1 if prediction > 0.5 else 0  # Threshold: 0.5
-    result = class_labels[predicted_class]
-
-    # Display the result
-    st.success(f"The audio suggests the leaf is **{result}**.")
-
-    # Optionally, display the MFCCs (or spectrogram) as a plot
-    plt.figure(figsize=(10, 6))
-    librosa.display.specshow(mfccs, x_axis='time', sr=sr)
-    plt.colorbar(format='%+2.0f dB')
-    plt.title("MFCCs of the Uploaded Audio")
-    st.pyplot(plt)
