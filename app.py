@@ -70,14 +70,15 @@ SUGGESTIONS = {
     ]
 }
 
+
 # GIF Mapping
 GIFS = {
     'Ball_007': 'outer.gif',
     'Ball_014': 'outer.gif',
     'Ball_021': 'outer.gif',
-    'IR_007': 'Inner.gif',
-    'IR_014': 'Inner.gif',
-    'IR_021': 'Inner.gif',
+    'IR_007': 'inner.gif',
+    'IR_014': 'inner.gif',
+    'IR_021': 'inner.gif',
     'OR_007': 'outer.gif',
     'OR_014': 'outer.gif',
     'OR_021': 'outer.gif'
@@ -87,14 +88,12 @@ GIFS = {
 def send_sms(prediction):
     """
     Sends an SMS with the prediction results to a predefined phone number.
-
-    :param prediction: The result string to send (e.g., 'Predicted label: IR_014')
     """
-    # Twilio credentials (replace with your actual credentials)
-    account_sid = 'AC6d5d0f3803551e856fad10a4ded78d75'  # Your Twilio Account SID
-    auth_token = '4ef44139be6cd513f724f8149e51daea'    # Your Twilio Auth Token
-    twilio_phone_number = '+12316255823'               # Your Twilio phone number
-    permanent_phone_number = '+919600508242'          # Your predefined phone number
+    # Twilio credentials from Streamlit Secrets
+    account_sid = st.secrets["twilio"]["account_sid"]
+    auth_token = st.secrets["twilio"]["auth_token"]
+    twilio_phone_number = st.secrets["twilio"]["twilio_phone_number"]
+    permanent_phone_number = st.secrets["twilio"]["permanent_phone_number"]
 
     # Create a Twilio client
     client = Client(account_sid, auth_token)
@@ -137,48 +136,7 @@ def preprocess_audio(file_path):
 
     return input_data
 
-
-GIFS = {
-    'Ball_007': 'outer.gif',
-    'Ball_014': 'outer.gif',
-    'Ball_021': 'outer.gif',
-    'IR_007': 'inner.gif',
-    'IR_014': 'inner.gif',
-    'IR_021': 'inner.gif',
-    'OR_007': 'outer.gif',
-    'OR_014': 'outer.gif',
-    'OR_021': 'outer.gif'
-}
-import streamlit as st
-
-# Custom CSS to change the color of st.success and st.info messages
-st.markdown(
-    """
-    <style>
-        /* Change background color to black and text color to white for st.success */
-        .st-success {
-            background-color: black;   /* Black background */
-            color: white;               /* White text */
-        }
-        
-        /* Change background color to black and text color to white for st.info */
-        .st-info {
-            background-color: black;   /* Black background */
-            color: white;               /* White text */
-        }
-        
-        /* Optionally, add some padding and border radius */
-        .st-success, .st-info {
-            border-radius: 5px;
-            padding: 10px;
-        }
-    </style>
-    """, unsafe_allow_html=True  # This argument ensures HTML is processed correctly
-)
-
-
-
-
+# Streamlit UI
 st.title("BEARING DEFECT CLASSIFIER")
 st.markdown("<br><br>", unsafe_allow_html=True)
 uploaded_file = st.file_uploader("Upload an MP3 or WAV file", type=["mp3", "wav"])
@@ -202,7 +160,6 @@ if uploaded_file is not None:
         # Display GIF if available for the prediction
         if predicted_label in GIFS:
             gif_path = GIFS[predicted_label]
-            
             st.image(gif_path, caption=f"Visualization for {predicted_label}", use_column_width=True)
 
         # Show suggestions based on the prediction
