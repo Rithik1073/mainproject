@@ -73,12 +73,12 @@ SUGGESTIONS = {
 
 # GIF Mapping
 GIFS = {
-    'Ball_007': 'outer.gif',
-    'Ball_014': 'outer.gif',
-    'Ball_021': 'outer.gif',
-    'IR_007': 'inner.gif',
-    'IR_014': 'inner.gif',
-    'IR_021': 'inner.gif',
+    'Ball_007': 'Roller.gif',
+    'Ball_014': 'Roller.gif',
+    'Ball_021': 'Roller.gif',
+    'IR_007': 'Inner.gif',
+    'IR_014': 'Inner.gif',
+    'IR_021': 'Inner.gif',
     'OR_007': 'outer.gif',
     'OR_014': 'outer.gif',
     'OR_021': 'outer.gif'
