@@ -4,3 +4,4 @@ pydub
 opencv-python-headless
 gdown
 numpy
+twilio
