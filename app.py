@@ -160,7 +160,7 @@ if uploaded_file is not None:
         # Display GIF if available for the prediction
         if predicted_label in GIFS:
             gif_path = GIFS[predicted_label]
-            st.image(gif_path, caption=f"Visualization for {predicted_label}", use_column_width=True)
+            st.image(gif_path, caption=f"Visualization for {predicted_label}", use_container_width=True)
 
         # Show suggestions based on the prediction
         if predicted_label in SUGGESTIONS:
