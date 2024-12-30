@@ -4,7 +4,7 @@ from tensorflow.keras.models import load_model
 from scipy.io.wavfile import read
 from twilio.rest import Client
 import os
-
+st.write(f"Current working directory: {os.getcwd()}")
 # Load the pre-trained model
 MODEL_PATH = 'CWRU_CNN_raw_time_domain_data.h5'  # Replace with your actual model path
 model = load_model(MODEL_PATH)
